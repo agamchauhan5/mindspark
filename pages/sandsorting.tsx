@@ -21,6 +21,12 @@ export default function SandSorting() {
   const [selectedBottle, setSelectedBottle] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
   const [gameWon, setGameWon] = useState(false);
+  const [howToPlayOpen, setHowToPlayOpen] = useState(false);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [difficultySelected, setDifficultySelected] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [pourAnimation, setPourAnimation] = useState<{
     from: number;
     to: number;
@@ -29,99 +35,115 @@ export default function SandSorting() {
   const [shakeBottle, setShakeBottle] = useState<number | null>(null);
   const [moveHistory, setMoveHistory] = useState<{ from: number; to: number }[]>([]);
   const animationFrameRef = useRef<number | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize game
   useEffect(() => {
-    initializeGame();
-  }, []);
+    if (difficultySelected) {
+      initializeGame();
+    }
+  }, [difficultySelected]);
+
+  // Timer effect
+  useEffect(() => {
+    if (gameStarted && startTime !== null && !gameWon) {
+      timerRef.current = setInterval(() => {
+        const now = Date.now();
+        setElapsedTime(Math.floor((now - startTime) / 1000));
+      }, 100);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [gameStarted, startTime, gameWon]);
 
   // Check win condition
   useEffect(() => {
-    if (bottles.length > 0 && checkWin(bottles)) {
+    if (bottles.length > 0 && moves > 0 && checkWin(bottles)) {
       setGameWon(true);
     }
   }, [bottles]);
 
-  const generateRandomBottles = (): Bottle[] => {
+  const generateRandomBottles = (diff: 'easy' | 'medium' | 'hard' = 'medium'): Bottle[] => {
+    // Determine number of colors based on difficulty
+    let numColors = INITIAL_BOTTLES;
+    if (diff === 'easy') numColors = 3;
+    else if (diff === 'medium') numColors = 4;
+    else numColors = 5; // hard
+    
+    const usedColors = COLORS.slice(0, numColors);
+    
+    // Create a pool of all sand layers
+    const allLayers: string[] = [];
+    for (const color of usedColors) {
+      for (let i = 0; i < CAPACITY; i++) {
+        allLayers.push(color);
+      }
+    }
+    
+    // Shuffle the layers using Fisher-Yates
+    for (let i = allLayers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allLayers[i], allLayers[j]] = [allLayers[j], allLayers[i]];
+    }
+    
+    // Distribute scrambled layers into bottles
     const newBottles: Bottle[] = [];
-    const usedColors = COLORS.slice(0, INITIAL_BOTTLES);
-
-    for (let i = 0; i < INITIAL_BOTTLES; i++) {
-      const layers = new Array(CAPACITY).fill(usedColors[i]);
+    let layerIndex = 0;
+    
+    for (let i = 0; i < numColors; i++) {
+      const layers: string[] = [];
+      for (let j = 0; j < CAPACITY; j++) {
+        layers.push(allLayers[layerIndex++]);
+      }
       newBottles.push({ id: i, layers, capacity: CAPACITY });
     }
-
-    // Add one empty bottle for working space
-    newBottles.push({ id: INITIAL_BOTTLES, layers: [], capacity: CAPACITY });
-
-    // Shuffle bottles using Fisher-Yates
-    for (let i = newBottles.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newBottles[i], newBottles[j]] = [newBottles[j], newBottles[i]];
-    }
-
-    // Scramble by doing random valid moves (more moves = harder puzzle)
-    let tempBottles = newBottles.map(b => ({ ...b, layers: [...b.layers] }));
-    let scrambleAttempts = 0;
     
-    while (scrambleAttempts < 60) {
-      const validMoves = [];
-      for (let from = 0; from < tempBottles.length; from++) {
-        if (tempBottles[from].layers.length === 0) continue;
-        for (let to = 0; to < tempBottles.length; to++) {
-          if (from === to) continue;
-          if (canPour(tempBottles, from, to)) {
-            validMoves.push({ from, to });
-          }
-        }
-      }
-      if (validMoves.length > 0) {
-        const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-        tempBottles = doMoveInternal(tempBottles, randomMove.from, randomMove.to);
-        scrambleAttempts++;
-      } else {
-        break;
-      }
+    // Add one or more empty bottles for working space based on difficulty
+    const emptyBottles = diff === 'easy' ? 2 : diff === 'medium' ? 1 : 1;
+    for (let i = 0; i < emptyBottles; i++) {
+      newBottles.push({ id: numColors + i, layers: [], capacity: CAPACITY });
     }
-
-    // Ensure puzzle is not solved - if it is, move pieces until it's not
-    let safetyCount = 0;
-    while (checkWin(tempBottles) && safetyCount < 10) {
-      const nonEmptyBottles = [];
-      for (let i = 0; i < tempBottles.length; i++) {
-        if (tempBottles[i].layers.length > 0) {
-          nonEmptyBottles.push(i);
-        }
-      }
+    
+    // Verify it's not already solved
+    if (checkWin(newBottles)) {
+      // If by extreme chance it's solved, swap some layers
+      const bottle1 = Math.floor(Math.random() * numColors);
+      const bottle2 = Math.floor(Math.random() * numColors);
       
-      if (nonEmptyBottles.length > 0) {
-        // Move from first non-empty to another bottle (or empty)
-        const fromIdx = nonEmptyBottles[0];
-        let moved = false;
-        
-        for (let toIdx = 0; toIdx < tempBottles.length; toIdx++) {
-          if (fromIdx !== toIdx && canPour(tempBottles, fromIdx, toIdx)) {
-            tempBottles = doMoveInternal(tempBottles, fromIdx, toIdx);
-            moved = true;
-            break;
-          }
-        }
-        
-        if (!moved) break;
+      if (bottle1 !== bottle2 && 
+          newBottles[bottle1].layers.length > 0 && 
+          newBottles[bottle2].layers.length > 0) {
+        const temp = newBottles[bottle1].layers[0];
+        newBottles[bottle1].layers[0] = newBottles[bottle2].layers[0];
+        newBottles[bottle2].layers[0] = temp;
       }
-      safetyCount++;
     }
-
-    return tempBottles;
+    
+    return newBottles;
   };
 
   const initializeGame = () => {
-    const newBottles = generateRandomBottles();
+    let newBottles = generateRandomBottles(difficulty);
+    
+    // Ensure the generated puzzle isn't already won
+    let attempts = 0;
+    while (checkWin(newBottles) && attempts < 20) {
+      newBottles = generateRandomBottles(difficulty);
+      attempts++;
+    }
+    
     setBottles(newBottles);
     setSelectedBottle(null);
     setMoves(0);
     setGameWon(false);
     setMoveHistory([]);
+    setStartTime(Date.now());
+    setElapsedTime(0);
+    setGameStarted(true);
   };
 
   const canPour = (bottleState: Bottle[], from: number, to: number): boolean => {
@@ -129,11 +151,8 @@ export default function SandSorting() {
     if (bottleState[from].layers.length === 0) return false;
     if (bottleState[to].layers.length >= bottleState[to].capacity) return false;
 
-    const fromTopColor = bottleState[from].layers[bottleState[from].layers.length - 1];
-    if (bottleState[to].layers.length === 0) return true;
-
-    const toTopColor = bottleState[to].layers[bottleState[to].layers.length - 1];
-    return fromTopColor === toTopColor;
+    // You can pour any color onto an empty bottle or any bottle with space
+    return true;
   };
 
   const getTopColorStack = (bottle: Bottle): { color: string; count: number } | null => {
@@ -212,8 +231,13 @@ export default function SandSorting() {
     );
   };
 
-  const resetGame = () => {
-    initializeGame();
+  const resetGame = (changeDifficulty: boolean = false) => {
+    if (changeDifficulty) {
+      setDifficultySelected(false);
+      setGameStarted(false);
+    } else {
+      initializeGame();
+    }
   };
 
   const undo = () => {
@@ -223,13 +247,105 @@ export default function SandSorting() {
     setMoves(Math.max(0, moves - 1));
 
     // Regenerate game state by replaying moves
-    const baseBottles = generateRandomBottles();
+    const baseBottles = generateRandomBottles(difficulty);
     let currentState = baseBottles;
     for (const move of newHistory) {
       currentState = doMoveInternal(currentState, move.from, move.to);
     }
     setBottles(currentState);
   };
+
+  // Show difficulty selection screen
+  if (!difficultySelected) {
+    return (
+      <>
+        <Head>
+          <title>Sand Sorting - MindSpark</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <script src="https://cdn.tailwindcss.com"></script>
+        </Head>
+        <Header
+          showHowToPlay
+          onHowToPlayClick={() => setHowToPlayOpen(true)}
+        />
+
+        <main className="flex-grow pt-20 px-3 sm:px-6 pb-6 flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
+          <div className="text-center max-w-2xl w-full">
+            <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 text-white">
+              Sand Sorting Puzzle
+            </h1>
+            <p className="text-lg sm:text-xl text-gray-300 mb-8">
+              Sort all the sand by color into individual bottles!
+            </p>
+
+            <div className="space-y-4 sm:space-y-5 mb-10">
+              <p className="text-sm sm:text-base text-gray-400">
+                Your goal is to get each bottle to contain only one color by moving sand between bottles.
+              </p>
+              <p className="text-sm sm:text-base text-gray-400">
+                Easy mode has 3 colors and 2 empty bottles. Medium has 4 colors and 1 empty bottle. Hard has 5 colors and 1 empty bottle.
+              </p>
+            </div>
+
+            <div className="mb-10">
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-4">Select Difficulty</h3>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                <button
+                  onClick={() => {
+                    setDifficulty('easy');
+                    setDifficultySelected(true);
+                  }}
+                  className="px-4 py-3 sm:py-4 bg-green-500/20 border-2 border-green-500 text-green-400 font-bold rounded-lg hover:bg-green-500/30 transition-all transform hover:scale-105 text-sm sm:text-base"
+                >
+                  🟢 Easy
+                </button>
+                <button
+                  onClick={() => {
+                    setDifficulty('medium');
+                    setDifficultySelected(true);
+                  }}
+                  className="px-4 py-3 sm:py-4 bg-yellow-500/20 border-2 border-yellow-500 text-yellow-400 font-bold rounded-lg hover:bg-yellow-500/30 transition-all transform hover:scale-105 text-sm sm:text-base"
+                >
+                  🟡 Medium
+                </button>
+                <button
+                  onClick={() => {
+                    setDifficulty('hard');
+                    setDifficultySelected(true);
+                  }}
+                  className="px-4 py-3 sm:py-4 bg-red-500/20 border-2 border-red-500 text-red-400 font-bold rounded-lg hover:bg-red-500/30 transition-all transform hover:scale-105 text-sm sm:text-base"
+                >
+                  🔴 Hard
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* How to Play Modal */}
+          {howToPlayOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-20">
+              <div className="bg-gray-800 rounded-xl p-6 w-96 text-center shadow-lg relative">
+                <button
+                  onClick={() => setHowToPlayOpen(false)}
+                  className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl"
+                >
+                  ×
+                </button>
+                <h2 className="text-2xl font-bold mb-4">How to Play</h2>
+                <p className="text-gray-300 text-lg">
+                  Click on a bottle to select it, then click another bottle to pour sand into it.<br />
+                  <br />
+                  The goal is to sort all the sand so that each bottle contains only one color.<br />
+                  <br />
+                  You can use the empty bottle to temporarily hold sand while organizing the other bottles.
+                </p>
+              </div>
+            </div>
+          )}
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -238,15 +354,22 @@ export default function SandSorting() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <script src="https://cdn.tailwindcss.com"></script>
       </Head>
-      <Header />
+      <Header
+        showHowToPlay
+        onHowToPlayClick={() => setHowToPlayOpen(true)}
+      />
 
       <main className="flex-grow pt-20 px-3 sm:px-6 pb-6 flex flex-col items-center justify-between min-h-screen relative bg-gradient-to-b from-slate-950 to-slate-900">
-        {/* Header */}
+        {/* Game Stats */}
         <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <div className="bg-slate-800 rounded-lg p-3 sm:p-4 border border-blue-500/30">
               <p className="text-blue-400 text-xs sm:text-sm font-semibold mb-1 sm:mb-2">MOVES</p>
               <p className="text-2xl sm:text-3xl font-bold text-white">{moves}</p>
+            </div>
+            <div className="bg-slate-800 rounded-lg p-3 sm:p-4 border border-cyan-500/30">
+              <p className="text-cyan-400 text-xs sm:text-sm font-semibold mb-1 sm:mb-2">TIME</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{elapsedTime}s</p>
             </div>
           </div>
 
@@ -260,14 +383,14 @@ export default function SandSorting() {
               ↶ Undo
             </button>
             <button
-              onClick={resetGame}
+              onClick={() => resetGame(false)}
               className="px-4 py-2 sm:py-3 bg-blue-500/20 border border-blue-500 text-blue-400 rounded-lg hover:bg-blue-500/30 transition font-semibold text-xs sm:text-sm"
-              title="Start new game"
+              title="Start new game with same difficulty"
             >
               🔄 Reset
             </button>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => resetGame(true)}
               className="px-4 py-2 sm:py-3 bg-red-500/20 border border-red-500 text-red-400 rounded-lg hover:bg-red-500/30 transition font-semibold text-xs sm:text-sm"
               title="Exit game"
             >
@@ -308,16 +431,20 @@ export default function SandSorting() {
                 >
                   {/* Sand layers */}
                   <div className="absolute bottom-0 w-full h-full rounded-b-3xl rounded-t-2xl overflow-hidden flex flex-col-reverse">
-                    {bottle.layers.map((color, index) => (
-                      <div
-                        key={index}
-                        className="flex-1 transition-all duration-500"
-                        style={{
-                          background: color,
-                          boxShadow: `inset -1px 0px 2px rgba(0,0,0,0.3), inset 1px 0px 2px rgba(255,255,255,0.1)`,
-                        }}
-                      />
-                    ))}
+                    {Array.from({ length: CAPACITY }).map((_, index) => {
+                      const layer = bottle.layers[index];
+                      return (
+                        <div
+                          key={`${bottle.id}-layer-${index}`}
+                          className="transition-all duration-500 border-b border-slate-700/50"
+                          style={{
+                            height: `${100 / CAPACITY}%`,
+                            background: layer || 'transparent',
+                            boxShadow: layer ? `inset -1px 0px 2px rgba(0,0,0,0.3), inset 1px 0px 2px rgba(255,255,255,0.1)` : 'none',
+                          }}
+                        />
+                      );
+                    })}
                   </div>
 
                   {/* Bottle highlight/glass effect */}
@@ -369,9 +496,14 @@ export default function SandSorting() {
                 Puzzle Complete!
               </h2>
               <p className="text-gray-300 text-lg sm:text-xl mb-2">Great job!</p>
-              <p className="text-gray-400 text-base sm:text-lg mb-6">
-                Solved in <span className="font-bold text-green-400">{moves}</span> moves
-              </p>
+              <div className="bg-slate-700/50 rounded-lg p-4 mb-6 border border-cyan-500/20">
+                <p className="text-gray-400 text-base sm:text-lg mb-3">
+                  Solved in <span className="font-bold text-green-400">{moves}</span> moves
+                </p>
+                <p className="text-gray-400 text-base sm:text-lg">
+                  Time: <span className="font-bold text-cyan-400">{elapsedTime}</span> seconds
+                </p>
+              </div>
               <div className="flex gap-3 flex-col sm:flex-row justify-center">
                 <button
                   onClick={resetGame}
@@ -421,6 +553,28 @@ export default function SandSorting() {
             animation: shake 0.3s ease-in-out;
           }
         `}</style>
+
+        {/* How to Play Modal */}
+        {howToPlayOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-20">
+            <div className="bg-gray-800 rounded-xl p-6 w-96 text-center shadow-lg relative">
+              <button
+                onClick={() => setHowToPlayOpen(false)}
+                className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+              <h2 className="text-2xl font-bold mb-4">How to Play</h2>
+              <p className="text-gray-300 text-lg">
+                Click on a bottle to select it, then click another bottle to pour sand into it.<br />
+                <br />
+                The goal is to sort all the sand so that each bottle contains only one color.<br />
+                <br />
+                You can use the empty bottle to temporarily hold sand while organizing the other bottles.
+              </p>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );

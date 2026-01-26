@@ -603,6 +603,30 @@ export default function ClickReflex() {
             </div>
           )}
         </div>
+
+        {/* How to Play Modal */}
+        {howToPlayOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-4">
+            <div className="bg-gray-800 rounded-xl p-6 sm:p-8 w-full max-w-md text-center shadow-lg relative">
+              <button
+                onClick={() => setHowToPlayOpen(false)}
+                className="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl sm:text-3xl"
+              >
+                ×
+              </button>
+              <h2 className="text-xl sm:text-2xl font-bold mb-4">How to Play</h2>
+              <p className="text-gray-300 text-xs sm:text-sm space-y-2 sm:space-y-3">
+                <div>1. Choose your difficulty level</div>
+                <div>2. A cyan circle will appear at a random location</div>
+                <div>3. Click the circle as fast as possible</div>
+                <div>4. Your reaction time appears on the left</div>
+                <div>5. Complete 10 circles to see your stats</div>
+                <div className="text-xs text-gray-500 pt-2"><strong>Difficulty:</strong> Harder = faster & smaller circles</div>
+                <div className="text-xs text-gray-500">Your best average score is saved automatically!</div>
+              </p>
+            </div>
+          </div>
+        )}
       </main>
 
       <style>{`
