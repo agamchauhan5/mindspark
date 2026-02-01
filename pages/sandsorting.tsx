@@ -506,7 +506,8 @@ export default function SandSorting() {
               </div>
               <div className="flex gap-3 flex-col sm:flex-row justify-center">
                 <button
-                  onClick={resetGame}
+                  // onClick={resetGame}
+                  onClick={() => resetGame()}
                   className="px-6 py-3 bg-gradient-to-r from-green-500 to-cyan-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-green-500/50 transition"
                 >
                   Play Again
