@@ -192,6 +192,26 @@ export default function Home() {
             </p>
           </Link>
 
+          {/* Tic-Tac-Toe Game */}
+          <Link
+            href="/tictactoe"
+            className="gameCard bg-gray-800 rounded-2xl p-6 shadow-lg hover:scale-105 transform transition-all duration-300 flex flex-col items-center text-center space-y-3 opacity-0"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 128 128"
+              className="w-16 h-16 text-green-400"
+            >
+              <rect x="20" y="20" width="88" height="88" fill="none" stroke="currentColor" strokeWidth="4" rx="8" />
+              <line x1="44" y1="44" x2="84" y2="84" stroke="currentColor" strokeWidth="4" />
+              <line x1="84" y1="44" x2="44" y2="84" stroke="currentColor" strokeWidth="4" />
+            </svg>
+            <h2 className="text-xl font-semibold">Tic-Tac-Toe</h2>
+            <p className="text-gray-400">
+              Classic strategy game — get three in a row to win!
+            </p>
+          </Link>
+
           {/* More Games Placeholder */}
           <div className="gameCard bg-gray-800 rounded-2xl p-6 shadow-lg flex flex-col items-center text-center space-y-3 opacity-0">
             <svg
