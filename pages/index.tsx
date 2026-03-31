@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Head from 'next/head';
-import Link from 'next/link';
-import Header from '@/components/Header';
+import { useState, useEffect } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import Header from "@/components/Header";
 
 declare global {
   const anime: any;
@@ -16,37 +16,37 @@ export default function Home() {
   useEffect(() => {
     // Run animations immediately - don't wait for window load
     const runAnimations = () => {
-      if (typeof window !== 'undefined' && (window as any).anime) {
+      if (typeof window !== "undefined" && (window as any).anime) {
         anime({
-          targets: '#header',
+          targets: "#header",
           opacity: [0, 1],
           translateY: [-40, 0],
-          easing: 'easeOutExpo',
+          easing: "easeOutExpo",
           duration: 800,
         });
 
         anime({
-          targets: '#mainTitle',
+          targets: "#mainTitle",
           opacity: [0, 1],
           translateY: [20, 0],
-          easing: 'easeOutExpo',
+          easing: "easeOutExpo",
           duration: 1000,
           delay: 300,
         });
 
         anime({
-          targets: '.gameCard',
+          targets: ".gameCard",
           opacity: [0, 1],
           scale: [0.75, 1],
-          easing: 'easeOutBack',
+          easing: "easeOutBack",
           duration: 800,
           delay: anime.stagger(200, { start: 600 }),
         });
 
         anime({
-          targets: '#gameGrid',
+          targets: "#gameGrid",
           opacity: [0, 1],
-          easing: 'easeOutQuad',
+          easing: "easeOutQuad",
           duration: 500,
           delay: 500,
         });
@@ -68,20 +68,26 @@ export default function Home() {
         <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
       </Head>
 
-      <Header 
-        showDonate 
-        showAbout 
+      <Header
+        showDonate
+        showAbout
         onDonateClick={() => setDonateModalOpen(true)}
         onAboutClick={() => setAboutModalOpen(true)}
       />
 
       <main className="flex-grow pt-20 px-6">
-        <h1 id="mainTitle" className="text-3xl font-bold text-center mb-8 opacity-0">
+        <h1
+          id="mainTitle"
+          className="text-3xl font-bold text-center mb-8 opacity-0"
+        >
           Choose a Game
         </h1>
 
         {/* Game Grid */}
-        <div id="gameGrid" className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 opacity-0">
+        <div
+          id="gameGrid"
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 opacity-0"
+        >
           {/* Reaction Speed Test */}
           <Link
             href="/reaction"
@@ -120,7 +126,15 @@ export default function Home() {
                 </radialGradient>
               </defs>
               <circle cx="64" cy="64" r="50" fill="url(#circleGrad)" />
-              <circle cx="64" cy="64" r="45" fill="none" stroke="#06b6d4" strokeWidth="2" opacity="0.5" />
+              <circle
+                cx="64"
+                cy="64"
+                r="45"
+                fill="none"
+                stroke="#06b6d4"
+                strokeWidth="2"
+                opacity="0.5"
+              />
             </svg>
             <h2 className="text-xl font-semibold">Click Reflex</h2>
             <p className="text-gray-400">
@@ -147,19 +161,48 @@ export default function Home() {
                   <stop offset="85%" stopColor="#06b6d4" />
                 </linearGradient>
               </defs>
-              
+
               {/* Tilted pouring bottle at top - angled 45 degrees */}
               <g transform="translate(140, 20) rotate(-45)">
                 {/* Bottle body */}
-                <rect x="-12" y="0" width="24" height="50" fill="#f5f5dc" stroke="#c9a961" strokeWidth="1.5" rx="3" />
+                <rect
+                  x="-12"
+                  y="0"
+                  width="24"
+                  height="50"
+                  fill="#f5f5dc"
+                  stroke="#c9a961"
+                  strokeWidth="1.5"
+                  rx="3"
+                />
                 {/* Sand pouring out - gradient effect */}
-                <path d="M -12 45 Q -15 50 -18 60 L -12 60 Q -10 55 -8 50 Z" fill="url(#bottleMulti)" opacity="0.9" />
+                <path
+                  d="M -12 45 Q -15 50 -18 60 L -12 60 Q -10 55 -8 50 Z"
+                  fill="url(#bottleMulti)"
+                  opacity="0.9"
+                />
                 {/* Bottle cap */}
-                <rect x="-10" y="-5" width="20" height="6" fill="#8b7355" rx="1" />
+                <rect
+                  x="-10"
+                  y="-5"
+                  width="20"
+                  height="6"
+                  fill="#8b7355"
+                  rx="1"
+                />
               </g>
-              
+
               {/* First bottle - left side with multiple colors */}
-              <rect x="10" y="70" width="28" height="80" fill="#f5f5dc" stroke="#c9a961" strokeWidth="1.5" rx="4" />
+              <rect
+                x="10"
+                y="70"
+                width="28"
+                height="80"
+                fill="#f5f5dc"
+                stroke="#c9a961"
+                strokeWidth="1.5"
+                rx="4"
+              />
               {/* Layered sand in first bottle */}
               <rect x="12" y="130" width="24" height="18" fill="#ef4444" />
               <rect x="12" y="112" width="24" height="18" fill="#f97316" />
@@ -167,24 +210,49 @@ export default function Home() {
               <rect x="12" y="76" width="24" height="18" fill="#22c55e" />
               {/* Cap */}
               <rect x="14" y="65" width="20" height="6" fill="#8b7355" rx="1" />
-              
+
               {/* Second bottle - center with gradient mix */}
-              <rect x="58" y="65" width="28" height="85" fill="#f5f5dc" stroke="#c9a961" strokeWidth="1.5" rx="4" />
+              <rect
+                x="58"
+                y="65"
+                width="28"
+                height="85"
+                fill="#f5f5dc"
+                stroke="#c9a961"
+                strokeWidth="1.5"
+                rx="4"
+              />
               {/* Layered sand */}
               <rect x="60" y="130" width="24" height="20" fill="#06b6d4" />
               <rect x="60" y="107" width="24" height="23" fill="#22c55e" />
               <rect x="60" y="75" width="24" height="32" fill="#eab308" />
               {/* Cap */}
               <rect x="62" y="60" width="20" height="6" fill="#8b7355" rx="1" />
-              
+
               {/* Third bottle - right side partial */}
-              <rect x="106" y="80" width="28" height="70" fill="#f5f5dc" stroke="#c9a961" strokeWidth="1.5" rx="4" />
+              <rect
+                x="106"
+                y="80"
+                width="28"
+                height="70"
+                fill="#f5f5dc"
+                stroke="#c9a961"
+                strokeWidth="1.5"
+                rx="4"
+              />
               {/* Layered sand */}
               <rect x="108" y="130" width="24" height="20" fill="#ec4899" />
               <rect x="108" y="105" width="24" height="25" fill="#8b5cf6" />
               <rect x="108" y="90" width="24" height="15" fill="#06b6d4" />
               {/* Cap */}
-              <rect x="110" y="75" width="20" height="6" fill="#8b7355" rx="1" />
+              <rect
+                x="110"
+                y="75"
+                width="20"
+                height="6"
+                fill="#8b7355"
+                rx="1"
+              />
             </svg>
             <h2 className="text-xl font-semibold">Sand Sorting</h2>
             <p className="text-gray-400">
@@ -202,13 +270,53 @@ export default function Home() {
               viewBox="0 0 128 128"
               className="w-16 h-16 text-green-400"
             >
-              <rect x="20" y="20" width="88" height="88" fill="none" stroke="currentColor" strokeWidth="4" rx="8" />
-              <line x1="44" y1="44" x2="84" y2="84" stroke="currentColor" strokeWidth="4" />
-              <line x1="84" y1="44" x2="44" y2="84" stroke="currentColor" strokeWidth="4" />
+              <rect
+                x="20"
+                y="20"
+                width="88"
+                height="88"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4"
+                rx="8"
+              />
+              <line
+                x1="44"
+                y1="44"
+                x2="84"
+                y2="84"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <line
+                x1="84"
+                y1="44"
+                x2="44"
+                y2="84"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
             </svg>
             <h2 className="text-xl font-semibold">Tic-Tac-Toe</h2>
             <p className="text-gray-400">
               Classic strategy game — get three in a row to win!
+            </p>
+          </Link>
+          {/* unblocked game */}
+          <Link
+            href="https://randombasketballonline.github.io/"
+            className="gameCard bg-gray-800 rounded-2xl p-6 shadow-lg hover:scale-105 transform transition-all duration-300 flex flex-col items-center text-center space-y-3 opacity-0"
+          >
+            <img
+              src="/basket-random.svg"
+              className="w-16 h-16"
+              alt="Random Basketball"
+            />
+
+            <h2 className="text-xl font-semibold">Random Basketball</h2>
+
+            <p className="text-gray-400">
+              Funny physics basketball game — score more than your opponent!
             </p>
           </Link>
 
@@ -246,8 +354,8 @@ export default function Home() {
             </button>
             <h2 className="text-2xl font-bold mb-4">Support MindSpark</h2>
             <p className="mb-4">
-              If you enjoy these games, consider donating to help us grow—just like
-              Wikipedia survives on community support 💙.
+              If you enjoy these games, consider donating to help us grow—just
+              like Wikipedia survives on community support 💙.
             </p>
             <button className="px-6 py-2 bg-yellow-500 rounded hover:bg-yellow-600 text-black font-bold">
               Donate Now
@@ -285,26 +393,32 @@ export default function Home() {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-indigo-400">About MindSpark</h2>
+            <h2 className="text-2xl font-bold mb-4 text-indigo-400">
+              About MindSpark
+            </h2>
             <p className="mb-4 text-gray-300">
-              MindSpark is a growing collection of fun, challenging games to play.
-              It's a place where you can test your skills, train your brain, and
-              have fun at the same time. New games are added regularly, so there's
-              always something fresh to try — from quick reaction tests to tricky
-              puzzles and skill challenges.
+              MindSpark is a growing collection of fun, challenging games to
+              play. It's a place where you can test your skills, train your
+              brain, and have fun at the same time. New games are added
+              regularly, so there's always something fresh to try — from quick
+              reaction tests to tricky puzzles and skill challenges.
             </p>
             <p className="mb-4 text-gray-300">
-              Whether you want to beat your best score, challenge your friends, or
-              just take a fun break, MindSpark has something for you.
+              Whether you want to beat your best score, challenge your friends,
+              or just take a fun break, MindSpark has something for you.
             </p>
             <ul className="text-left space-y-2 text-gray-300 max-w-lg mx-auto">
-              <li>🎮 Many games — reaction, logic, memory, puzzles, and more</li>
+              <li>
+                🎮 Many games — reaction, logic, memory, puzzles, and more
+              </li>
               <li>➕ Always growing — new games keep being added</li>
               <li>
-                🧠 Skill-building — test focus, speed, memory, and problem solving
+                🧠 Skill-building — test focus, speed, memory, and problem
+                solving
               </li>
               <li>
-                🏆 Competitive & fun — track high scores and aim higher each time
+                🏆 Competitive & fun — track high scores and aim higher each
+                time
               </li>
             </ul>
           </div>
