@@ -108,7 +108,6 @@ export default function Home() {
               Test your reflexes and see how fast you can react.
             </p>
           </Link>
-
           {/* Click Reflex Game */}
           <Link
             href="/clickreflex"
@@ -141,7 +140,6 @@ export default function Home() {
               Click the circle as fast as you can — test your speed and focus!
             </p>
           </Link>
-
           {/* Sand Sorting Game */}
           <Link
             href="/sandsorting"
@@ -259,7 +257,6 @@ export default function Home() {
               Sort colored sand into bottles — a relaxing puzzle game
             </p>
           </Link>
-
           {/* Tic-Tac-Toe Game */}
           <Link
             href="/tictactoe"
@@ -302,7 +299,8 @@ export default function Home() {
               Classic strategy game — get three in a row to win!
             </p>
           </Link>
-          {/* unblocked game */}
+          
+          {/* unblocked games */}
           <Link
             href="https://randombasketballonline.github.io/"
             className="gameCard bg-gray-800 rounded-2xl p-6 shadow-lg hover:scale-105 transform transition-all duration-300 flex flex-col items-center text-center space-y-3 opacity-0"
@@ -320,6 +318,23 @@ export default function Home() {
             </p>
           </Link>
 
+          <Link
+            href="https://geometry-games.io/  "
+            className="gameCard bg-gray-800 rounded-2xl p-6 shadow-lg hover:scale-105 transform transition-all duration-300 flex flex-col items-center text-center space-y-3 opacity-0"
+          >
+            <img
+              src="/geometry-dash.svg"
+              className="w-16 h-16"
+              alt="Geometry Dash"
+            />
+
+            <h2 className="text-xl font-semibold">Geometry Dash</h2>
+
+            <p className="text-gray-400">
+              A thrilling rhythm-based platformer with intense levels and addictive gameplay.
+            </p>
+          </Link>
+          {/* unblocked games */}
           {/* More Games Placeholder */}
           <div className="gameCard bg-gray-800 rounded-2xl p-6 shadow-lg flex flex-col items-center text-center space-y-3 opacity-0">
             <svg
